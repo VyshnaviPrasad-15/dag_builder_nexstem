@@ -1,4 +1,3 @@
-// components/buttons/AddNodeButton/index.js
 import React from "react";
 import { MdAddCircle } from "react-icons/md";
 import "./index.css";

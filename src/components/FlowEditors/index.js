@@ -1,4 +1,3 @@
-// components/FlowEditors/index.js
 import React, { useCallback, useRef, useState, useEffect } from "react";
 import ReactFlow, {
   ReactFlowProvider,
@@ -144,7 +143,7 @@ function FlowEditorInner() {
       <div className="toolbar">
         <AddNodeButton onClick={addNode} />
         <DeleteButton onClick={deleteSelected} />
-        <button className="btn auto-btn" onClick={applyAutoLayout}>
+        <button className="btn " onClick={applyAutoLayout}>
           <MdAutoFixHigh style={{ marginRight: "4px" }} />
           Auto Layout
         </button>
