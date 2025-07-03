@@ -1,3 +1,4 @@
+// components/FlowEditors/index.js
 import React, { useCallback, useRef, useState, useEffect } from "react";
 import ReactFlow, {
   ReactFlowProvider,
@@ -10,18 +11,15 @@ import ReactFlow, {
   useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
-
 import dagre from "dagre";
-
 import "./index.css";
 import CustomNode from "../CustomNode";
-import validateDag from "../validateDag";
 import AddNodeButton from "../buttons/AddNodeButton";
 import DeleteButton from "../buttons/DeleteButton";
-
+import validateDag from "../validateDag";
 import { v4 as uuidv4 } from "uuid";
-import { MdCheckCircle, MdCancel } from "react-icons/md";
-import { MdAutoFixHigh } from "react-icons/md";
+import { MdCheckCircle, MdCancel, MdAutoFixHigh } from "react-icons/md";
+import { Tooltip } from "react-tooltip";
 
 const nodeTypes = { custom: CustomNode };
 const nodeWidth = 172;
@@ -31,6 +29,7 @@ function FlowEditorInner() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isValidDag, setIsValidDag] = useState({ valid: true });
+  const [contextMenu, setContextMenu] = useState(null);
 
   const reactFlowWrapper = useRef(null);
   const { project, fitView } = useReactFlow();
@@ -49,6 +48,7 @@ function FlowEditorInner() {
       type: "custom",
       position,
       data: { label },
+      style: { border: "2px solid #339af0", borderRadius: "50%" },
     };
 
     setNodes((nds) => [...nds, newNode]);
@@ -63,7 +63,14 @@ function FlowEditorInner() {
     (params) => {
       if (params.source === params.target) return;
       setEdges((eds) =>
-        addEdge({ ...params, markerEnd: { type: "arrow" } }, eds)
+        addEdge(
+          {
+            ...params,
+            markerEnd: { type: "arrow" },
+            style: { stroke: "#555" },
+          },
+          eds
+        )
       );
     },
     [setEdges]
@@ -90,6 +97,7 @@ function FlowEditorInner() {
         type: "custom",
         position,
         data: { label },
+        style: { border: "2px dashed #fab005" }, // Dropped node styling
       };
 
       setNodes((nds) => nds.concat(newNode));
@@ -124,22 +132,31 @@ function FlowEditorInner() {
     setTimeout(() => fitView({ padding: 0.2 }), 0);
   }, [nodes, edges, setNodes, fitView]);
 
+  const handleRightClick = useCallback((event) => {
+    event.preventDefault();
+    setContextMenu({ x: event.clientX, y: event.clientY });
+  }, []);
+
+  const closeContextMenu = () => setContextMenu(null);
+
   useEffect(() => {
     setIsValidDag(validateDag(nodes, edges));
   }, [nodes, edges]);
 
   useEffect(() => {
     const handleDelete = (e) => {
-      if (e.key === "Delete") {
-        deleteSelected();
-      }
+      if (e.key === "Delete") deleteSelected();
     };
     window.addEventListener("keydown", handleDelete);
     return () => window.removeEventListener("keydown", handleDelete);
   }, [deleteSelected]);
 
   return (
-    <div className="flow-wrapper" ref={reactFlowWrapper}>
+    <div
+      className="flow-wrapper"
+      ref={reactFlowWrapper}
+      onContextMenu={handleRightClick}
+    >
       <div className="toolbar">
         <AddNodeButton onClick={addNode} />
         <DeleteButton onClick={deleteSelected} />
@@ -160,11 +177,29 @@ function FlowEditorInner() {
             </>
           )}
         </span>
+        <Tooltip effect="solid" />
       </div>
+
+      {contextMenu && (
+        <div
+          className="context-menu"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={closeContextMenu}
+        >
+          <div className="context-item">
+            Coming soon: Rename / Connect / Delete
+          </div>
+        </div>
+      )}
 
       <ReactFlow
         nodes={nodes}
-        edges={edges}
+        edges={edges.map((e) => ({
+          ...e,
+          style: {
+            stroke: isValidDag.valid ? "#555" : "red",
+          },
+        }))}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}

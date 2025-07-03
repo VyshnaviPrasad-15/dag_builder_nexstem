@@ -1,58 +1,53 @@
 export default function validateDag(nodes, edges) {
-  if (nodes.length < 2) {
-    return { valid: false, reason: "At least 2 nodes required" };
-  }
-
-  const nodeIds = new Set(nodes.map((n) => n.id));
   const adjList = {};
-  const visited = {};
-  const stack = {};
+  const visited = new Set();
+  const recStack = new Set();
+  const invalidEdges = new Set();
 
-  nodeIds.forEach((id) => {
-    adjList[id] = [];
-    visited[id] = false;
-    stack[id] = false;
+  nodes.forEach((node) => {
+    adjList[node.id] = [];
   });
 
-  for (const edge of edges) {
-    if (edge.source === edge.target) {
-      return { valid: false, reason: "Self-loop detected" };
-    }
-    if (adjList[edge.source] && nodeIds.has(edge.target)) {
-      adjList[edge.source].push(edge.target);
-    }
-  }
+  edges.forEach((edge) => {
+    adjList[edge.source].push(edge.target);
+  });
 
-  const dfs = (nodeId) => {
-    visited[nodeId] = true;
-    stack[nodeId] = true;
+  function dfs(nodeId) {
+    visited.add(nodeId);
+    recStack.add(nodeId);
 
-    for (const neighbor of adjList[nodeId] || []) {
-      if (!visited[neighbor] && dfs(neighbor)) return true;
-      else if (stack[neighbor]) return true;
+    for (const neighbor of adjList[nodeId]) {
+      if (!visited.has(neighbor)) {
+        if (dfs(neighbor)) {
+          // Add edge that causes cycle
+          const culprit = edges.find(
+            (e) => e.source === nodeId && e.target === neighbor
+          );
+          if (culprit) invalidEdges.add(culprit.id);
+          return true;
+        }
+      } else if (recStack.has(neighbor)) {
+        const culprit = edges.find(
+          (e) => e.source === nodeId && e.target === neighbor
+        );
+        if (culprit) invalidEdges.add(culprit.id);
+        return true;
+      }
     }
 
-    stack[nodeId] = false;
+    recStack.delete(nodeId);
     return false;
-  };
+  }
 
-  for (const nodeId of nodeIds) {
-    if (!visited[nodeId] && dfs(nodeId)) {
-      return { valid: false, reason: "Cycle detected" };
+  for (const node of nodes) {
+    if (!visited.has(node.id) && dfs(node.id)) {
+      return {
+        valid: false,
+        reason: "Cycle detected",
+        invalidEdgeIds: [...invalidEdges],
+      };
     }
   }
 
-  const connectedNodeIds = new Set();
-  for (const edge of edges) {
-    connectedNodeIds.add(edge.source);
-    connectedNodeIds.add(edge.target);
-  }
-
-  for (const nodeId of nodeIds) {
-    if (!connectedNodeIds.has(nodeId)) {
-      return { valid: false, reason: "All nodes must be connected" };
-    }
-  }
-
-  return { valid: true };
+  return { valid: true, invalidEdgeIds: [] };
 }
