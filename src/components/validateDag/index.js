@@ -4,15 +4,15 @@ export default function validateDag(nodes, edges) {
   const recStack = new Set();
   const invalidEdges = new Set();
 
-  // Create a set of existing node IDs for validation
+ 
   const nodeIds = new Set(nodes.map((n) => n.id));
 
-  // Initialize adjacency list
+
   nodes.forEach((node) => {
     adjList[node.id] = [];
   });
 
-  // Add edges to the adjacency list only if both source and target exist
+ 
   edges.forEach((edge) => {
     if (adjList[edge.source] && nodeIds.has(edge.target)) {
       adjList[edge.source].push(edge.target);
