@@ -4,9 +4,8 @@ A modern, interactive Directed Acyclic Graph (DAG) editor built with React and R
 
 ---
 
-Screenshots:
-![Editor View](screenshots/editor.png)
-![Auto Layout](screenshots/auto-layout.png)
+Demo:
+![Editor View](/React App.mp4)
 
 ---
 
