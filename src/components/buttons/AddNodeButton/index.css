@@ -1,0 +1,17 @@
+/* components/buttons/AddNodeButton/style.css */
+.btn.add-node {
+  background-color: #4caf50;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.btn.add-node:hover {
+  background-color: #45a049;
+}
