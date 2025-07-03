@@ -5,7 +5,7 @@ A modern, interactive Directed Acyclic Graph (DAG) editor built with React and R
 ---
 
 Demo:
-![Editor View](React App.mp4)
+![Editor View]([React App.mp4](https://github.com/VyshnaviPrasad-15/dag_builder_nexstem/blob/main/React%20App.mp4))
 
 ---
 
