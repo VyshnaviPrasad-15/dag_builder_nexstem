@@ -4,22 +4,29 @@ export default function validateDag(nodes, edges) {
   const recStack = new Set();
   const invalidEdges = new Set();
 
+  // Create a set of existing node IDs for validation
+  const nodeIds = new Set(nodes.map((n) => n.id));
+
+  // Initialize adjacency list
   nodes.forEach((node) => {
     adjList[node.id] = [];
   });
 
+  // Add edges to the adjacency list only if both source and target exist
   edges.forEach((edge) => {
-    adjList[edge.source].push(edge.target);
+    if (adjList[edge.source] && nodeIds.has(edge.target)) {
+      adjList[edge.source].push(edge.target);
+    }
   });
 
   function dfs(nodeId) {
     visited.add(nodeId);
     recStack.add(nodeId);
 
-    for (const neighbor of adjList[nodeId]) {
+    const neighbors = adjList[nodeId] || [];
+    for (const neighbor of neighbors) {
       if (!visited.has(neighbor)) {
         if (dfs(neighbor)) {
-          // Add edge that causes cycle
           const culprit = edges.find(
             (e) => e.source === nodeId && e.target === neighbor
           );
